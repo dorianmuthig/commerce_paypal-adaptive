@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Installs the tables required by Commerce PayPal Chained.
+ * Installs the tables required by Commerce PayPal simple.
  */
 
 
 /**
  * Implements hook_schema().
  */
-function commerce_paypal_chained_schema() {
+function commerce_paypal_simple_schema() {
   $schema = array();
 
-  $schema['commerce_paypal_chained_ipn'] = array(
+  $schema['commerce_paypal_simple_ipn'] = array(
     'description' => 'Stores processed IPNs.',
     'fields' => array(
       'ipn_id' => array(
@@ -22,7 +22,7 @@ function commerce_paypal_chained_schema() {
         'not null' => TRUE,
       ),
       'pay_key' => array(
-        'description' => 'The PayPal pay key associated with this chained payment.',
+        'description' => 'The PayPal pay key associated with this simple payment.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -94,8 +94,8 @@ function commerce_paypal_chained_schema() {
       'pay_key' => array('pay_key'),
     ),
   );
-  
-  $schema['commerce_paypal_chained_ipn_transaction'] = array(
+
+  $schema['commerce_paypal_simple_ipn_transaction'] = array(
     'description' => 'Stores processed IPN transactions.',
     'fields' => array(
       'ipn_transaction_id' => array(
@@ -173,7 +173,7 @@ function commerce_paypal_chained_schema() {
     'primary key' => array('ipn_transaction_id'),
     'foreign keys' => array(
       'ipn_id' => array(
-        'table' => 'commerce_paypal_chained_ipn',
+        'table' => 'commerce_paypal_simple_ipn',
         'columns'=> array('ipn_id' => 'ipn_id'),
       ),
       'transaction_id' => array(
@@ -185,8 +185,8 @@ function commerce_paypal_chained_schema() {
       'ipn_id' => array('ipn_id'),
     ),
   );
-  
-  $schema['commerce_paypal_chained_pay_chain'] = array(
+
+  $schema['commerce_paypal_simple_pay_chain'] = array(
     'description' => 'Stores pay chains associated with orders.',
     'fields' => array(
       'pay_chain_id' => array(
@@ -243,92 +243,92 @@ function commerce_paypal_chained_schema() {
 /**
  * Implements hook_install().
  */
-function commerce_paypal_chained_install() {
+function commerce_paypal_simple_install() {
   // Define the payment receiver field and create it
   $field = array (
     'translatable' => '0',
-    'entity_types' => 
+    'entity_types' =>
     array (
     ),
-    'settings' => 
+    'settings' =>
     array (
       'max_length' => '255',
     ),
-    'storage' => 
+    'storage' =>
     array (
       'type' => 'field_sql_storage',
-      'settings' => 
+      'settings' =>
       array (
       ),
       'module' => 'field_sql_storage',
       'active' => '1',
-      'details' => 
+      'details' =>
       array (
-        'sql' => 
+        'sql' =>
         array (
-          'FIELD_LOAD_CURRENT' => 
+          'FIELD_LOAD_CURRENT' =>
           array (
-            'field_data_field_chained_receiver_email' => 
+            'field_data_field_simple_receiver_email' =>
             array (
-              'value' => 'field_chained_receiver_email_value',
-              'format' => 'field_chained_receiver_email_format',
+              'value' => 'field_simple_receiver_email_value',
+              'format' => 'field_simple_receiver_email_format',
             ),
           ),
-          'FIELD_LOAD_REVISION' => 
+          'FIELD_LOAD_REVISION' =>
           array (
-            'field_revision_field_chained_receiver_email' => 
+            'field_revision_field_simple_receiver_email' =>
             array (
-              'value' => 'field_chained_receiver_email_value',
-              'format' => 'field_chained_receiver_email_format',
+              'value' => 'field_simple_receiver_email_value',
+              'format' => 'field_simple_receiver_email_format',
             ),
           ),
         ),
       ),
     ),
-    'foreign keys' => 
+    'foreign keys' =>
     array (
-      'format' => 
+      'format' =>
       array (
         'table' => 'filter_format',
-        'columns' => 
+        'columns' =>
         array (
           'format' => 'format',
         ),
       ),
     ),
-    'indexes' => 
+    'indexes' =>
     array (
-      'format' => 
+      'format' =>
       array (
         0 => 'format',
       ),
     ),
     'id' => '48',
-    'field_name' => 'field_chained_receiver_email',
+    'field_name' => 'field_simple_receiver_email',
     'type' => 'text',
     'module' => 'text',
     'active' => '1',
     'locked' => '0',
     'cardinality' => '1',
     'deleted' => '0',
-    'columns' => 
+    'columns' =>
     array (
-      'value' => 
+      'value' =>
       array (
         'type' => 'varchar',
         'length' => '255',
         'not null' => false,
       ),
-      'format' => 
+      'format' =>
       array (
         'type' => 'varchar',
         'length' => 255,
         'not null' => false,
       ),
     ),
-    'bundles' => 
+    'bundles' =>
     array (
-      'commerce_payment_transaction' => 
+      'commerce_payment_transaction' =>
       array (
         0 => 'commerce_payment_transaction',
       ),
@@ -338,29 +338,29 @@ function commerce_paypal_chained_install() {
   // Create an instance of our field on the commerce_payment_transaction entity
   $field_instance = array (
     'label' => 'Receiver Email Address',
-    'widget' => 
+    'widget' =>
     array (
       'weight' => '-3',
       'type' => 'text_textfield',
       'module' => 'text',
       'active' => 1,
-      'settings' => 
+      'settings' =>
       array (
         'size' => '60',
       ),
     ),
-    'settings' => 
+    'settings' =>
     array (
       'text_processing' => '0',
       'user_register_form' => false,
     ),
-    'display' => 
+    'display' =>
     array (
-      'default' => 
+      'default' =>
       array (
         'label' => 'above',
         'type' => 'text_default',
-        'settings' => 
+        'settings' =>
         array (
         ),
         'module' => 'text',
@@ -371,18 +371,51 @@ function commerce_paypal_chained_install() {
     'description' => '',
     'fences_wrapper' => '',
     'default_value' => NULL,
-    'field_name' => 'field_chained_receiver_email',
+    'field_name' => 'field_simple_receiver_email',
     'entity_type' => 'commerce_payment_transaction',
-    'bundle' => 'paypal_chained',
+    'bundle' => 'paypal_simple',
     'deleted' => '0',
   );
   field_create_instance($field_instance);
 }
 
+function commerce_paypal_simple_enable() {
+  // Check if our field is not already created.
+  if (!field_info_field('field_paypal_simple_paypal_email')) {
+    $field = array(
+      'field_name' => 'field_paypal_simple_paypal_email',
+      'type' => 'text',
+    );
+
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'field_paypal_simple_paypal_email',
+      'entity_type' => 'user',
+      'label' => 'My PayPal Account Email',
+      'description' => 'This email account is used for Paypal Adpative Simple Payments',
+      'bundle' => 'user',
+      // If you don't set the "required" property then the field wont be required by default.
+      'required' => TRUE,
+      'settings' => array(
+        // Here you inform either or not you want this field showing up on the registration form.
+        'user_register_form' => 1,
+      ),
+      'widget' => array(
+        'type' => 'textfield',
+      ),
+    );
+
+    field_create_instance($instance);
+  }
+}
+
 /**
  * Implements hook_uninstall().
  */
-function commerce_paypal_chained_uninstall() {
-  // Queue up our field_chained_receiver_email field for deletion.
-  field_delete_field('field_chained_receiver_email');
+function commerce_paypal_simple_uninstall() {
+  // Queue up our field_simple_receiver_email field for deletion.
+  field_delete_field('field_simple_receiver_email');
+  field_delete_field('field_paypal_simple_paypal_email');
 }
