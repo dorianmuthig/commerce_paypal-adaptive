@@ -37,7 +37,7 @@ function commerce_paypal_simple_entity_info_alter(&$entity_info) {
  */
 function commerce_paypal_simple_menu() {
 
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   $items = array();
 
   // Define an additional IPN path that is specific to our payment method /
@@ -56,7 +56,7 @@ function commerce_paypal_simple_menu() {
  * Returns the default settings for the PayPal Simple payment method.
  */
 function commerce_paypal_simple_default_settings() {
-dd(__FUNCTION__, date("h:i:s" ,time()));
+//dd(__FUNCTION__, date("h:i:s" ,time()));
   $default_currency = commerce_default_currency();
   return array(
     'application_id' => '',
@@ -86,7 +86,7 @@ dd(__FUNCTION__, date("h:i:s" ,time()));
  * Payment method callback: settings form.
  */
 function commerce_paypal_simple_settings_form($settings = array()) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   $form = array();
 
   // Merge default settings into the stored settings array.
@@ -211,7 +211,7 @@ function commerce_paypal_simple_settings_form($settings = array()) {
  * the payment method settings.
  */
 function commerce_paypal_simple_submit_form($payment_method, $pane_values, $checkout_pane, $order) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   $form = array();
 
   if (!empty($payment_method['settings']['show_payment_instructions'])) {
@@ -227,7 +227,7 @@ function commerce_paypal_simple_submit_form($payment_method, $pane_values, $chec
  * Implements hook_form_FORM_ID_alter().
  */
 function commerce_paypal_simple_form_commerce_checkout_form_alter(&$form, &$form_state) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   // If this checkout form contains the payment method radios...
   if (!empty($form['commerce_payment']['payment_method']['#options'])) {
     // Loop over its options array looking for a PayPal Simple option.
@@ -299,8 +299,8 @@ function commerce_paypal_simple_get_product_owner($order) {
  *   use function for building a simple form.
  */
 function commerce_paypal_simple_redirect_form($form, &$form_state, $order, $payment_method) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
-  dd(ddebug_backtrace(true));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(ddebug_backtrace(true));
 
   // Return an error if the enabling action's settings haven't been configured.
   if (empty($payment_method['settings']['application_id']) ||
@@ -329,7 +329,7 @@ function commerce_paypal_simple_redirect_form($form, &$form_state, $order, $paym
  * Payment method callback: redirect form return validation.
  */
 function commerce_paypal_simple_redirect_form_validate($order, $payment_method) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   if (!empty($payment_method['settings']['ipn_logging']) &&
     $payment_method['settings']['ipn_logging'] == 'full_ipn') {
     watchdog('commerce_paypal_simple', 'Customer returned from PayPal with the following POST data:!ipn_data', array('!ipn_data' => '<pre>' . check_plain(print_r($_POST, TRUE)) . '</pre>'), WATCHDOG_NOTICE);
@@ -355,7 +355,7 @@ function commerce_paypal_simple_redirect_form_validate($order, $payment_method) 
  *   The original IPN with some meta data related to local processing.
  */
 function commerce_paypal_simple_ipn_load($id, $type = 'pay_key') {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   // Grab the base IPN array
   $ipn = db_select('commerce_paypal_simple_ipn', 'cpci')
     ->fields('cpci')
@@ -385,7 +385,7 @@ function commerce_paypal_simple_ipn_load($id, $type = 'pay_key') {
  *     it will also contain the serial numeric ipn_id used locally.
  */
 function commerce_paypal_simple_ipn_save(&$ipn) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   // Split our transactions off of our IPN since they get stored in different
   // tables
   $ipn_transactions = $ipn['transaction'];
@@ -444,7 +444,7 @@ function commerce_paypal_simple_ipn_save(&$ipn) {
  *      ipn_transaction_ids used locally.
  */
 function commerce_paypal_simple_ipn_transactions_save(&$ipn_transactions, $ipn_id) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
 
   foreach ($ipn_transactions as $key => $ipn_transaction) {
     // Associate this ipn transaction with its parent IPN
@@ -505,7 +505,7 @@ function commerce_paypal_simple_ipn_delete($id) {
  *   TRUE or FALSE indicating whether the IPN was successfully processed or not.
  */
 function commerce_paypal_simple_process_ipn($debug_ipn = array()) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   // Load up our payment method instance array
   $payment_method = commerce_payment_method_instance_load('paypal_simple|commerce_payment_paypal_simple');
   // Retrieve the IPN from $_POST if the caller did not supply an IPN array.
@@ -674,7 +674,7 @@ function commerce_paypal_simple_process_ipn($debug_ipn = array()) {
  *   price, and other parameters as possible.
  */
 function commerce_paypal_simple_paypal_ipn_validate($order, $payment_method, $ipn) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   // Return FALSE if chain described in this IPN doesn't match the chain we have
   // recorded for this order
   $record = db_select('commerce_paypal_simple_pay_chain', 'cpcpc')
@@ -733,7 +733,7 @@ function commerce_paypal_simple_paypal_ipn_validate($order, $payment_method, $ip
  * Payment method callback: process an IPN once it's been validated.
  */
 function commerce_paypal_simple_paypal_ipn_process($order, $payment_method, &$ipn) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   // For now, we only recognize COMPLETED paychains
   // Exit when we don't get a payment status of COMPLETED.
   if ($ipn['status'] != 'COMPLETED') {
@@ -818,10 +818,10 @@ function commerce_paypal_simple_paypal_ipn_process($order, $payment_method, &$ip
  *   A renderable form array.
  */
 function commerce_paypal_simple_order_form($form, &$form_state, $order, $settings) {
-  dd($order, 'order');
+  //dd($order, 'order');
 
   $wrapper = entity_metadata_wrapper('commerce_order', $order);
-  dd($wrapper, 'wrapper');
+  //dd($wrapper, 'wrapper');
 
   // Determine the currency code to use to actually process the transaction,
   // which will either be the default currency code or the currency code of the
@@ -908,7 +908,7 @@ function commerce_paypal_simple_order_form($form, &$form_state, $order, $setting
  *   The URL to use to submit requests to the PayPal Simple server.
  */
 function commerce_paypal_simple_server_url($server) {
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   switch ($server) {
     case 'sandbox':
       return 'https://www.sandbox.paypal.com/cgi-bin/webscr';
@@ -1008,7 +1008,7 @@ function commerce_paypal_simple_languages() {
  */
 function commerce_paypal_simple_get_paykey($receivers, $memo = '', $tracking_id = '', $application_id, $currency_code, $cancel_url, $return_url, $ipn_url, $server = 'sandbox', $api_username, $api_password, $api_signature) {
   // Build our payrequest
-  dd(__FUNCTION__, date("h:i:s" ,time()));
+  //dd(__FUNCTION__, date("h:i:s" ,time()));
   $pay_request = array(
     'actionType' => 'PAY',
     'receiverList' => array(
@@ -1062,7 +1062,7 @@ function commerce_paypal_simple_get_paykey($receivers, $memo = '', $tracking_id 
   curl_close($ch);
   // Our response was in JSON, so decode it into a PHP object
   $result = json_decode($result);
-  dd($result, 'json_decode');
+  //dd($result, 'json_decode');
   // If PayPal gave us an acknowledgement of success and a paykey, proceed
   if (strtolower($result->responseEnvelope->ack) == 'success' && !empty($result->payKey)) {
     // Return the PayKey
