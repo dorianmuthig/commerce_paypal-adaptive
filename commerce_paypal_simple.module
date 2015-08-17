@@ -278,20 +278,54 @@ function commerce_paypal_simple_immplicitly_approved($order, $payment_method) {
     return FALSE;
 }
 
-function commerce_paypal_simple_get_product_owner($order) {
- // the following code is copied from clevername, https://drupal.org/node/2050565
-  $orders = commerce_order_load_multiple(array(), array('status' => 'pending'), TRUE);
+function commerce_paypal_simple_get_products_with_owner($thisOrder) {
+    // the following code is copied from clevername, https://drupal.org/node/2050565
+    $orders = commerce_order_load_multiple(array(), array('status' => 'pending'), TRUE);
 
-  foreach($orders as $order) {
-    foreach ($order->commerce_line_items['und'] as $line) {
-      $line_item = commerce_line_item_load($line['line_item_id']);
-      $product_id = $line_item->commerce_product['und'][0]['product_id'];
+	//$product_uid;
+    //foreach($orders as $order)
+    //{
+        //foreach ($order->commerce_line_items['und'] as $line)
+		//{
+        //    $line_item = commerce_line_item_load($line['line_item_id']);
+        //    $product_id = $line_item->commerce_product['und'][0]['product_id'];
+        //}
+      
+	    //Load first product from order line item and fetch author uid
+        //$product_item = commerce_product_load($product_id);
+        //$product_uid = $product_item->uid;
+		
+		//dpm($product_item);
+		//dd("lala");
+		
+		//$product_wrapper = entity_metadata_wrapper('commerce_product', $product_id);
+		//$product_nodes = $product_wrapper->field_product_node->value();
+		//$product_node = node_load($product_nodes);
+		//$product_uid = $product_node->uid;
+	//}
+	
+    $product_ids = array();
+	$product_items = array();
+	$product_uids = array();
+    foreach (entity_metadata_wrapper('commerce_order', $thisOrder)->commerce_line_items as $delta => $line_item_wrapper)
+    {
+        if (in_array($line_item_wrapper->type->value(), commerce_product_line_item_types()))
+	    {
+          $product_ids[] = $line_item_wrapper->commerce_product->raw();
+		  $product_items[end($product_ids)] = array();
+		  $product_items[end($product_ids)]['product'] = commerce_product_load(end($product_ids));
+		  $product_items[end($product_ids)]['price'] = $line_item_wrapper->value()->commerce_unit_price['und'][0];
+		  $product_items[end($product_ids)]['quantity'] = (int)$line_item_wrapper->value()->quantity;
+		  $product_uids[] = end($product_items)['product']->uid;
+        }
     }
-  //Load first product from order line item and fetch author uid
-    $product_item = commerce_product_load($product_id);
-    $product_uid = $product_item->uid;
-  }
-  return $product_uid;
+	//$product_id = end($product_ids);
+	//$product_item = commerce_product_load($product_id);
+	//$product_uid = $product_item->uid;
+	//dpm($product_ids);
+	//dpm($product_items);
+	
+    return $product_items;
 }
 
 /**
@@ -837,15 +871,52 @@ function commerce_paypal_simple_order_form($form, &$form_state, $order, $setting
   // Populate the receivers array (define our simple payment)
   // We'll define the first receiver as our primary
 
-  $product_uid = commerce_paypal_simple_get_product_owner($order);
-  $product_user = user_load($product_uid);
+  $product_items = commerce_paypal_simple_get_products_with_owner($order);
+  //$product_user = user_load($product_uid[0]);
+  
+  //dpm($product_items);
+  
+  $receivers = array();
+  $receivers_counter = 0;
+  foreach ($product_items as $product_id => $product_item)
+  {
+	  $money_amount = $product_item['price']['amount'] * $product_item['quantity'];
+	  $money_currency = $product_item['price']['currency_code'];
+	  $product_user = user_load($product_item['product']->uid);
+	  $product_user_email = token_replace('[user:field-paypal-simple-paypal-email]', array('user' => $product_user));
+	  $receiver_emails = array();
+	  foreach ($receivers as $key => $value)
+	  {
+		  $receiver_emails[] = $value['email'];
+	  }
+	  if (in_array($product_user_email, $receiver_emails))
+	  {
+		  foreach ($receivers as $key => $value)
+		  {
+			  if ($value['email'] === $product_user_email)
+			  {
+			  	  $receivers[$key]['amount'] = number_format(((float)$receivers[$key]['amount'] + (float)commerce_paypal_price_amount(commerce_currency_convert($money_amount, $order_currency_code, $money_currency), $money_currency)), 2, '.', ''); //works, sort of, but not ideal, better multiply by 100 and divide again after
+			  }
+		  }
+	  }
+	  else
+	  {
+  	      $receivers[] = array(
+      	      'amount' => commerce_paypal_price_amount(commerce_currency_convert($money_amount, $order_currency_code, $money_currency), $money_currency),
+              'email' => $product_user_email //,
+		      //'paymentType' => 'DIGITALGOODS'
+          );
+  	  }
+	  $receivers_counter++;
+	      // gotta figure out how to deal with and throw an error if there are more than six (6) receivers, which PayPal won't allow...
+  }
 
-  //module_exists('token'))
-  $receivers = array(
-    0 => array(
-      'amount' => commerce_paypal_price_amount(commerce_currency_convert($amount, $order_currency_code, $currency_code), $currency_code),
-      'email' =>  token_replace('[user:field-paypal-simple-paypal-email]', array('user' => $product_user))),
-  );
+ // //module_exists('token'))
+ // $receivers = array(
+ //   0 => array(
+  //    'amount' => commerce_paypal_price_amount(commerce_currency_convert($amount, $order_currency_code, $currency_code), $currency_code),
+  //    'email' =>  token_replace('[user:field-paypal-simple-paypal-email]', array('user' => $product_user))),
+ // );
 
   $memo = t('Order @order_number at @store', array('@order_number' => $order->order_number, '@store' => variable_get('site_name', url('<front>', array('absolute' => TRUE)))));
   // Use the commerce_paypal ipn invoice number so we associate the IPN response
@@ -1009,6 +1080,10 @@ function commerce_paypal_simple_languages() {
 function commerce_paypal_simple_get_paykey($receivers, $memo = '', $tracking_id = '', $application_id, $currency_code, $cancel_url, $return_url, $ipn_url, $server = 'sandbox', $api_username, $api_password, $api_signature) {
   // Build our payrequest
   //dd(__FUNCTION__, date("h:i:s" ,time()));
+  if ($server === 'sandbox')
+  {
+	  $application_id = 'APP-80W284485P519543T'; // See https://developer.paypal.com/docs/classic/lifecycle/sb_credentials/
+  }
   $pay_request = array(
     'actionType' => 'PAY',
     'receiverList' => array(
@@ -1027,6 +1102,7 @@ function commerce_paypal_simple_get_paykey($receivers, $memo = '', $tracking_id 
       'errorLanguage' => 'en_US',
     ),
   );
+  //dpm($pay_request);
   // Convert it to JSON
   $pay_request_json = json_encode($pay_request);
   // Initialize cURL with our desired API endpoint
