@@ -962,6 +962,7 @@ function commerce_paypal_simple_order_form($form, &$form_state, $order, $setting
   }
   // Set our form action to
   $form['#action'] = commerce_paypal_simple_server_url($settings['server']) . '?cmd=_ap-payment&paykey=' . $pay_key;
+  //$form['#action'] = commerce_paypal_simple_server_url($settings['server']) . '?paykey=' . $pay_key . '&expType=mini';
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Proceed to PayPal'),
@@ -983,6 +984,7 @@ function commerce_paypal_simple_server_url($server) {
   switch ($server) {
     case 'sandbox':
       return 'https://www.sandbox.paypal.com/cgi-bin/webscr';
+      //return 'https://www.sandbox.paypal.com/webapps/adaptivepayment/flow/pay'; //this has nicer mobile layout, but will go horribly wrong when returning to site
     case 'live':
       return 'https://www.paypal.com/cgi-bin/webscr';
   }
