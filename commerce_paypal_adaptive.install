@@ -381,9 +381,9 @@ function commerce_paypal_adaptive_install() {
 
 function commerce_paypal_adaptive_enable() {
   // Check if our field is not already created.
-  if (!field_info_field('field_paypal_adaptive_paypal_email')) {
+  if (!field_info_field('field_paypal_adaptive_email')) {
     $field = array(
-      'field_name' => 'field_paypal_adaptive_paypal_email',
+      'field_name' => 'field_paypal_adaptive_email',
       'type' => 'text',
     );
 
@@ -391,7 +391,7 @@ function commerce_paypal_adaptive_enable() {
 
     // Create the instance on the bundle.
     $instance = array(
-      'field_name' => 'field_paypal_adaptive_paypal_email',
+      'field_name' => 'field_paypal_adaptive_email',
       'entity_type' => 'user',
       'label' => 'PayPal Account Email',
       'description' => 'This email address is used as the account for Paypal Adpative Payments.',
@@ -417,5 +417,5 @@ function commerce_paypal_adaptive_enable() {
 function commerce_paypal_adaptive_uninstall() {
   // Queue up our field_adaptive_receiver_email field for deletion.
   field_delete_field('field_adaptive_receiver_email');
-  field_delete_field('field_paypal_adaptive_paypal_email');
+  field_delete_field('field_paypal_adaptive_email');
 }

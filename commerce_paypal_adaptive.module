@@ -883,7 +883,7 @@ function commerce_paypal_adaptive_order_form($form, &$form_state, $order, $setti
 	  $money_amount = $product_item['price']['amount'] * $product_item['quantity'];
 	  $money_currency = $product_item['price']['currency_code'];
 	  $product_user = user_load($product_item['product']->uid);
-	  $product_user_email = token_replace('[user:field-paypal-adaptive-paypal-email]', array('user' => $product_user));
+	  $product_user_email = token_replace('[user:field-paypal-adaptive-email]', array('user' => $product_user));
 	  $receiver_emails = array();
 	  foreach ($receivers as $key => $value)
 	  {
@@ -915,7 +915,7 @@ function commerce_paypal_adaptive_order_form($form, &$form_state, $order, $setti
  // $receivers = array(
  //   0 => array(
   //    'amount' => commerce_paypal_price_amount(commerce_currency_convert($amount, $order_currency_code, $currency_code), $currency_code),
-  //    'email' =>  token_replace('[user:field-paypal-adaptive-paypal-email]', array('user' => $product_user))),
+  //    'email' =>  token_replace('[user:field-paypal-adaptive-email]', array('user' => $product_user))),
  // );
 
   $memo = t('Order @order_number at @store', array('@order_number' => $order->order_number, '@store' => variable_get('site_name', url('<front>', array('absolute' => TRUE)))));
