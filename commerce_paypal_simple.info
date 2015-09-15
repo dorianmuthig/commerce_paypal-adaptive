@@ -1,5 +1,5 @@
-name = PayPal Simple Payments
-description = Implements PayPal Adaptive Simple Payments in Drupal Commerce checkout.
+name = PayPal Adaptive Payments
+description = Implements PayPal Adaptive Payments in Drupal Commerce checkout.
 package = Commerce (PayPal)
 dependencies[] = commerce
 dependencies[] = commerce_ui

@@ -1,9 +1,12 @@
 
-<h1> commerce_paypal_simple </h1>
+<h1> commerce_paypal-adaptive </h1>
 
 # Purpose 
-Drupal Commerce PayPal Adaptivement Simple Payments
+Drupal Commerce PayPal Adaptive Payments
 This is a simplified version of Commerce PayPal Chained
+
+# Commerce PayPal Adaptive Simple Payments
+This module is a fork of `commerce_paypal_simple`
 
 # Commerce Paypal Chained
 *All source files are copied from Commerce PayPal Chained
@@ -11,6 +14,8 @@ This is a simplified version of Commerce PayPal Chained
 Information about About PayPal Chained
 1. https://drupal.org/node/2082691
 2. https://github.com/chrisolof/commerce_paypal_chained
+`commerce_paypal_simple`
+1. https://github.com/PlusGenie/commerce_paypal_simple
 
 
 # How to Use 

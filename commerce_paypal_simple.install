@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Installs the tables required by Commerce PayPal simple.
+ * Installs the tables required by Commerce PayPal Adaptive.
  */
 
 
 /**
  * Implements hook_schema().
  */
-function commerce_paypal_simple_schema() {
+function commerce_paypal_adaptive_schema() {
   $schema = array();
 
-  $schema['commerce_paypal_simple_ipn'] = array(
+  $schema['commerce_paypal_adaptive_ipn'] = array(
     'description' => 'Stores processed IPNs.',
     'fields' => array(
       'ipn_id' => array(
@@ -22,7 +22,7 @@ function commerce_paypal_simple_schema() {
         'not null' => TRUE,
       ),
       'pay_key' => array(
-        'description' => 'The PayPal pay key associated with this simple payment.',
+        'description' => 'The PayPal pay key associated with this adaptive payment.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -95,7 +95,7 @@ function commerce_paypal_simple_schema() {
     ),
   );
 
-  $schema['commerce_paypal_simple_ipn_transaction'] = array(
+  $schema['commerce_paypal_adaptive_ipn_transaction'] = array(
     'description' => 'Stores processed IPN transactions.',
     'fields' => array(
       'ipn_transaction_id' => array(
@@ -173,7 +173,7 @@ function commerce_paypal_simple_schema() {
     'primary key' => array('ipn_transaction_id'),
     'foreign keys' => array(
       'ipn_id' => array(
-        'table' => 'commerce_paypal_simple_ipn',
+        'table' => 'commerce_paypal_adaptive_ipn',
         'columns'=> array('ipn_id' => 'ipn_id'),
       ),
       'transaction_id' => array(
@@ -186,7 +186,7 @@ function commerce_paypal_simple_schema() {
     ),
   );
 
-  $schema['commerce_paypal_simple_pay_chain'] = array(
+  $schema['commerce_paypal_adaptive_pay_chain'] = array(
     'description' => 'Stores pay chains associated with orders.',
     'fields' => array(
       'pay_chain_id' => array(
@@ -243,7 +243,7 @@ function commerce_paypal_simple_schema() {
 /**
  * Implements hook_install().
  */
-function commerce_paypal_simple_install() {
+function commerce_paypal_adaptive_install() {
   // Define the payment receiver field and create it
   $field = array (
     'translatable' => '0',
@@ -268,18 +268,18 @@ function commerce_paypal_simple_install() {
         array (
           'FIELD_LOAD_CURRENT' =>
           array (
-            'field_data_field_simple_receiver_email' =>
+            'field_data_field_adaptive_receiver_email' =>
             array (
-              'value' => 'field_simple_receiver_email_value',
-              'format' => 'field_simple_receiver_email_format',
+              'value' => 'field_adaptive_receiver_email_value',
+              'format' => 'field_adaptive_receiver_email_format',
             ),
           ),
           'FIELD_LOAD_REVISION' =>
           array (
-            'field_revision_field_simple_receiver_email' =>
+            'field_revision_field_adaptive_receiver_email' =>
             array (
-              'value' => 'field_simple_receiver_email_value',
-              'format' => 'field_simple_receiver_email_format',
+              'value' => 'field_adaptive_receiver_email_value',
+              'format' => 'field_adaptive_receiver_email_format',
             ),
           ),
         ),
@@ -304,7 +304,7 @@ function commerce_paypal_simple_install() {
       ),
     ),
     'id' => '48',
-    'field_name' => 'field_simple_receiver_email',
+    'field_name' => 'field_adaptive_receiver_email',
     'type' => 'text',
     'module' => 'text',
     'active' => '1',
@@ -371,19 +371,19 @@ function commerce_paypal_simple_install() {
     'description' => '',
     'fences_wrapper' => '',
     'default_value' => NULL,
-    'field_name' => 'field_simple_receiver_email',
+    'field_name' => 'field_adaptive_receiver_email',
     'entity_type' => 'commerce_payment_transaction',
-    'bundle' => 'paypal_simple',
+    'bundle' => 'paypal_adaptive',
     'deleted' => '0',
   );
   field_create_instance($field_instance);
 }
 
-function commerce_paypal_simple_enable() {
+function commerce_paypal_adaptive_enable() {
   // Check if our field is not already created.
-  if (!field_info_field('field_paypal_simple_paypal_email')) {
+  if (!field_info_field('field_paypal_adaptive_paypal_email')) {
     $field = array(
-      'field_name' => 'field_paypal_simple_paypal_email',
+      'field_name' => 'field_paypal_adaptive_paypal_email',
       'type' => 'text',
     );
 
@@ -391,10 +391,10 @@ function commerce_paypal_simple_enable() {
 
     // Create the instance on the bundle.
     $instance = array(
-      'field_name' => 'field_paypal_simple_paypal_email',
+      'field_name' => 'field_paypal_adaptive_paypal_email',
       'entity_type' => 'user',
-      'label' => 'My PayPal Account Email',
-      'description' => 'This email account is used for Paypal Adpative Simple Payments',
+      'label' => 'PayPal Account Email',
+      'description' => 'This email address is used as the account for Paypal Adpative Payments.',
       'bundle' => 'user',
       // If you don't set the "required" property then the field wont be required by default.
       'required' => TRUE,
@@ -414,8 +414,8 @@ function commerce_paypal_simple_enable() {
 /**
  * Implements hook_uninstall().
  */
-function commerce_paypal_simple_uninstall() {
-  // Queue up our field_simple_receiver_email field for deletion.
-  field_delete_field('field_simple_receiver_email');
-  field_delete_field('field_paypal_simple_paypal_email');
+function commerce_paypal_adaptive_uninstall() {
+  // Queue up our field_adaptive_receiver_email field for deletion.
+  field_delete_field('field_adaptive_receiver_email');
+  field_delete_field('field_paypal_adaptive_paypal_email');
 }
