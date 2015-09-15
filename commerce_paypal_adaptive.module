@@ -910,7 +910,18 @@ function commerce_paypal_adaptive_order_form($form, &$form_state, $order, $setti
 	  $receivers_counter++;
 	      // gotta figure out how to deal with and throw an error if there are more than six (6) receivers, which PayPal won't allow...
   }
-
+  $calculate_paypal_fees_into_amounts = true;
+  //dpm($receivers);
+  // add fee to purchaser's checkout amount to unburden merchant, todo: make configurable from drupal web UI
+  if ($calculate_paypal_fees_into_amounts === true)
+  {
+      foreach ($receivers as $key => $value)
+      {
+          // highest possible fee is 3.9% + 35 cents
+          $receivers[$key]['amount'] = round(((float)$receivers[$key]['amount'] + 0.35) * 1.0416666666667, 2).'';
+      }
+  }
+  //dpm($receivers);
  // //module_exists('token'))
  // $receivers = array(
  //   0 => array(
