@@ -637,7 +637,7 @@ function commerce_paypal_adaptive_redirect_form_validate($order, $payment_method
                 $txn_result = $txnNvpSerialized;
                 //dpm($txnNvpSerialized);
                 // If the request failed, exit now with a failure message.
-                if ($txn_result['ACK'] == 'Failure')
+                if (!isset($txn_result['ACK']) || $txn_result['ACK'] != 'Success')
                 {
                     return FALSE;
                 }
