@@ -641,6 +641,40 @@ function commerce_paypal_adaptive_redirect_form_validate($order, $payment_method
                 {
                     return FALSE;
                 }
+                else if ($txn_result['ACK'] === 'Success')
+                {
+                    // we could mark the order as paid in full here
+                    if (empty($order->data['commerce_payment_order_paid_in_full_invoked']))
+                    {
+                        //create a commerce transaction
+                        $charge = $order->commerce_order_total['und'][0];
+                        $transaction = commerce_payment_transaction_new('paypal_adaptive', $order->order_id);
+                        $transaction->instance_id = $payment_method['instance_id'];
+                        $transaction->amount = $charge['amount'];
+                        $transaction->currency_code = $charge['currency_code'];
+                        $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+                        $transaction->message = 'Name: @name';
+                        $transaction->message_variables = array('@name' => 'PayPal payment');
+                        commerce_payment_transaction_save($transaction);
+                        commerce_payment_commerce_payment_transaction_insert($transaction);
+                        
+                        // Check the order balance and invoke the event.
+                        $balance = commerce_payment_order_balance($order);
+                        //dpm($balance);
+                        
+                        if ($balance['amount'] <= 0)
+                        {
+                            // Invoke the event including a hook of the same name.
+                            rules_invoke_all('commerce_payment_order_paid_in_full', $order, $transaction);
+                    
+                            // Update the order's data array to indicate this just happened.
+                            $order->data['commerce_payment_order_paid_in_full_invoked'] = TRUE;
+                    
+                            // Save the updated order.
+                            commerce_order_save($order);
+                        }
+                    }
+                }
             }
             else
             {
