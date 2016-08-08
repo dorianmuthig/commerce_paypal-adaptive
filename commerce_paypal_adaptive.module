@@ -355,6 +355,9 @@ function commerce_paypal_adaptive_get_receivers($order)
         $money_currency = $product_item['price']['currency_code'];
         $product_user = user_load($product_item['product']->uid);
         $product_user_email = token_replace('[user:field-paypal-adaptive-email]', array('user' => $product_user));
+        $product_user_api_username = token_replace('[user:field-paypal-adaptive-api-user]', array('user' => $product_user));
+        $product_user_api_password = token_replace('[user:field-paypal-adaptive-api-psw]', array('user' => $product_user));
+        $product_userapi_signature = token_replace('[user:field-paypal-adaptive-api-sig]', array('user' => $product_user));
         $receiver_emails = array();
         foreach ($receivers as $key => $value)
         {
@@ -374,7 +377,10 @@ function commerce_paypal_adaptive_get_receivers($order)
         {
             $receivers[] = array(
                 'amount' => commerce_paypal_price_amount(commerce_currency_convert($money_amount, $order_currency_code, $money_currency), $money_currency),
-                'email' => $product_user_email //,
+                'email' => $product_user_email,
+                'api_username' => $product_user_api_username,
+                'api_password' => $product_user_api_password,
+                'api_signature' => $product_userapi_signature //,
                 //'paymentType' => 'DIGITALGOODS'
             );
         }
@@ -382,7 +388,7 @@ function commerce_paypal_adaptive_get_receivers($order)
     }
     
     $calculate_paypal_fees_into_amounts = true;
-    //dpm($receivers);
+    //dpm($receivers); // after returning from PayPal
     // add fee to purchaser's checkout amount to unburden merchant, todo: make configurable from drupal web UI
     if ($calculate_paypal_fees_into_amounts === true)
     {
@@ -412,10 +418,11 @@ function commerce_paypal_adaptive_redirect_form($form, &$form_state, $order, $pa
   //dd(ddebug_backtrace(true));
   
   // Return an error if the enabling action's settings haven't been configured.
-  if (empty($payment_method['settings']['application_id']) ||
-    empty($payment_method['settings']['api_username']) ||
-    empty($payment_method['settings']['api_password']) ||
-    empty($payment_method['settings']['api_signature'])) {
+  if (empty($payment_method['settings']['application_id']) //||
+    // empty($payment_method['settings']['api_username']) ||
+    // empty($payment_method['settings']['api_password']) ||
+    // empty($payment_method['settings']['api_signature'])
+    ) {
     drupal_set_message(t('PayPal Adaptive is not configured for use.'), 'error');
     return array();
   }
@@ -459,9 +466,9 @@ function commerce_paypal_adaptive_redirect_form_validate($order, $payment_method
         
         $settings = $payment_method['settings'];
         $application_id = $settings['application_id'];
-        $api_username = $settings['api_username'];
-        $api_password = $settings['api_password'];
-        $api_signature = $settings['api_signature'];
+        $api_username = $receivers[0]['api_username'];
+        $api_password = $receivers[0]['api_password'];
+        $api_signature = $receivers[0]['api_signature'];
         $server = $settings['server'];
         
         $record = db_select('commerce_paypal_adaptive_pay_chain', 'cpcpc')
@@ -1186,6 +1193,8 @@ function commerce_paypal_adaptive_order_form($form, &$form_state, $order, $setti
     // We'll define the first receiver as our primary
     
     $receivers = commerce_paypal_adaptive_get_receivers($order);
+    //dpm($receivers); // before going to PayPal
+
         // gotta figure out how to deal with and throw an error if there are more than six (6) receivers, which PayPal won't allow...
     
     $memo = t('Order @order_number at @store', array('@order_number' => $order->order_number, '@store' => variable_get('site_name', url('<front>', array('absolute' => TRUE)))));
@@ -1229,9 +1238,9 @@ function commerce_paypal_adaptive_order_form($form, &$form_state, $order, $setti
             $settings['return'],
             $ipn_url,
             $settings['server'],
-            $settings['api_username'],
-            $settings['api_password'],
-            $settings['api_signature']
+            $receivers[0]['api_username'],
+            $receivers[0]['api_password'],
+            $receivers[0]['api_signature']
         );
     }
     // If we got a pay key back, then we're clear to transact with these settings,
@@ -1906,4 +1915,29 @@ function commerce_paypal_adaptive_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'commerce_paypal_adaptive') . '/includes/views',
   );
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function commerce_paypal_adaptive_preprocess_user_profile(&$vars)
+{
+    $current_user = user_uid_optional_load();
+    if ($current_user->uid != 1)
+    {
+        //dpm($vars['user_profile']);
+        unset($vars['user_profile']['field_paypal_adaptive_email']);
+        unset($vars['user_profile']['field_paypal_adaptive_api_user']);
+    }
+    unset($vars['user_profile']['field_paypal_adaptive_api_psw']);
+    unset($vars['user_profile']['field_paypal_adaptive_api_sig']);
+}
+
+  /**
+ * Update the field registrations.
+ */
+function commerce_paypal_adaptive_update_7002()
+{
+    commerce_paypal_adaptive_enable();
+    return;
 }
